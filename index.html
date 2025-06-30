@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>저관여 메모장</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 1rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      padding: 0.5rem;
+      background: #eee;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .delete-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 저관여 메모장</h1>
+    <textarea id="memo-input" placeholder="메모를 입력하세요..."></textarea>
+    <button id="save-btn">저장</button>
+    <ul id="memo-list"></ul>
+  </div>
+
+  <script>
+    const input = document.getElementById("memo-input");
+    const saveBtn = document.getElementById("save-btn");
+    const memoList = document.getElementById("memo-list");
+
+    const MEMOS_KEY = 'simple_memos';
+
+    function getMemos() {
+      return JSON.parse(localStorage.getItem(MEMOS_KEY)) || [];
+    }
+
+    function saveMemos(memos) {
+      localStorage.setItem(MEMOS_KEY, JSON.stringify(memos));
+    }
+
+    function renderMemos() {
+      memoList.innerHTML = "";
+      const saved = getMemos();
+      saved.forEach((memo) => {
+        const li = document.createElement("li");
+        li.textContent = memo.content;
+
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "🗑";
+        delBtn.className = "delete-btn";
+        delBtn.onclick = () => {
+          const updated = getMemos().filter(m => m.id !== memo.id);
+          saveMemos(updated);
+          renderMemos();
+        };
+
+        li.appendChild(delBtn);
+        memoList.appendChild(li);
+      });
+    }
+
+    saveBtn.addEventListener("click", () => {
+      const content = input.value.trim();
+      if (!content) return;
+      const newMemo = { id: Date.now(), content };
+      const updated = [newMemo, ...getMemos()];
+      saveMemos(updated);
+      input.value = "";
+      renderMemos();
+    });
+
+    renderMemos();
+  </script>
+</body>
+</html>
